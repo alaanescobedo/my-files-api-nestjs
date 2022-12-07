@@ -9,7 +9,7 @@ export default (configService: ConfigService) => ({
   password: configService.get('POSTGRES_PASSWORD'),
   database: configService.get('POSTGRES_DB'),
   entities: [
-    __dirname + '/../**/*.entity.js',
+    __dirname + '/../../**/*.entity.js',
   ],
   synchronize: true,
 }) as TypeOrmModuleOptions;

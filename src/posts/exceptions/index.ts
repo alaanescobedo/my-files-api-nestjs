@@ -1,0 +1,1 @@
+export { default as PostNotFoundException } from './post-not-found.exception';
