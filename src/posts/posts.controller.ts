@@ -1,5 +1,5 @@
 
-import { Body, Controller, Delete, Get, Param, Post, Patch, Req } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Patch, UseInterceptors } from '@nestjs/common';
 import { UseGuards } from '@nestjs/common/decorators/core/use-guards.decorator';
 import JwtAuthGuard from 'src/auth/guards/jwt-auth.guard';
 import { CurrentUser } from 'src/users/decorators/current-user';
@@ -7,8 +7,10 @@ import User from 'src/users/user.entity';
 import { FindOneParams } from 'src/utils/id-param';
 import { CreatePostDto, UpdatePostDto } from './dtos';
 import PostsService from './posts.service';
+import { ClassSerializerInterceptor } from '@nestjs/common/serializer';
 
 @Controller('posts')
+@UseInterceptors(ClassSerializerInterceptor)
 export default class PostsController {
   constructor(
     private readonly postsService: PostsService

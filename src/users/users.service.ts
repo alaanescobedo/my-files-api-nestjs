@@ -5,6 +5,7 @@ import { Repository } from 'typeorm';
 import User from './user.entity';
 import CreateUserDto from './dtos/create-user.dto';
 import { FilesService } from 'src/files/files.service';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UsersService {
@@ -18,9 +19,8 @@ export class UsersService {
     const user = await this.usersRepository.findOne({
       where: { email }
     });
-    if (user) {
-      return user;
-    }
+    if (user) return user;
+
     throw new HttpException('User with this email does not exist', HttpStatus.NOT_FOUND);
   }
 
@@ -28,9 +28,8 @@ export class UsersService {
     const user = await this.usersRepository.findOne({
       where: { id }
     });
-    if (user) {
-      return user;
-    }
+    if (user) return user;
+
     throw new HttpException('User with this id does not exist', HttpStatus.NOT_FOUND);
   }
 
@@ -70,5 +69,29 @@ export class UsersService {
       avatar: null
     });
     await this.filesService.deletePublicFile(fileId)
+  }
+
+  async setCurrentRefreshToken(refreshToken: string, userId: number) {
+    const currentHashedRefreshToken = await bcrypt.hash(refreshToken, 10);
+    await this.usersRepository.update(userId, {
+      refreshToken: currentHashedRefreshToken
+    });
+  }
+
+  async getUserIfRefreshTokenMatches(refreshToken: string, userId: number) {
+    const user = await this.getById(userId);
+
+    const isRefreshTokenMatching = await bcrypt.compare(
+      refreshToken,
+      user.refreshToken
+    );
+
+    if (isRefreshTokenMatching) return user;
+  }
+
+  async removeRefreshToken(userId: number) {
+    return this.usersRepository.update(userId, {
+      refreshToken: null
+    });
   }
 }

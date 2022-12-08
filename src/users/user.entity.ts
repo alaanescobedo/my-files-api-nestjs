@@ -30,6 +30,10 @@ class User {
   @OneToOne(() => PublicFile, { eager: true, nullable: true })
   @JoinColumn()
   public avatar?: PublicFile;
+
+  @Column({ nullable: true })
+  @Exclude()
+  public refreshToken?: string;
 }
 
 export default User;

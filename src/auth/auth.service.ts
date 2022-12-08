@@ -22,13 +22,11 @@ export class AuthService {
         ...registrationData,
         password: hashedPassword
       });
-      createdUser.password = undefined;
       return createdUser;
     } catch (error) {
       if (error?.code === PostgresErrorCode.UniqueViolation) {
         throw new HttpException('User with that email already exists', HttpStatus.BAD_REQUEST);
       }
-      console.log(error.message)
       throw new HttpException('Something went wrong', HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
@@ -37,21 +35,49 @@ export class AuthService {
     try {
       const user = await this.usersService.getByEmail(email);
       await this.verifyPassword(plainTextPasswordi, user.password);
-      user.password = undefined;
       return user;
     } catch (error) {
       throw new HttpException('Wrong credentials provided', HttpStatus.BAD_REQUEST);
     }
   }
 
-  public getCookieWithJwtToken(userId: number) {
-    const payload: TokenPayload = { userId };
-    const token = this.jwtService.sign(payload);
-    return `Authentication=${token}; HttpOnly; Path=/; Max-Age=${this.configService.get('JWT_EXPIRATION_TIME')}`;
+  public getCookieWithJwtAccessToken(userId: number) {
+    try {
+      const payload: TokenPayload = { userId };
+      const token = this.jwtService.sign(payload, {
+        secret: this.configService.get('JWT_ACCESS_TOKEN_SECRET'),
+        expiresIn: `${this.configService.get('JWT_ACCESS_TOKEN_EXPIRATION_TIME')}s`
+      });
+      return `Authentication=${token}; HttpOnly; Path=/; Max-Age=${this.configService.get('JWT_ACCESS_TOKEN_EXPIRATION_TIME')}`;
+    }
+    catch (error) {
+      throw new HttpException('Something went wrong', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 
-  public getCookieForLogOut() {
-    return `Authentication=; HttpOnly; Path=/; Max-Age=0`;
+  public getCookieWithJwtRefreshToken(userId: number) {
+    try {
+      const payload: TokenPayload = { userId };
+      const token = this.jwtService.sign(payload, {
+        secret: this.configService.get('JWT_REFRESH_TOKEN_SECRET'),
+        expiresIn: `${this.configService.get('JWT_REFRESH_TOKEN_EXPIRATION_TIME')}s`
+      });
+      const cookie = `Refresh=${token}; HttpOnly; Path=/; Max-Age=${this.configService.get('JWT_REFRESH_TOKEN_EXPIRATION_TIME')}`;
+      return {
+        cookie,
+        token
+      }
+    }
+    catch (error) {
+      throw new HttpException('Something went wrong', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  public getCookiesForLogOut() {
+    return [
+      'Authentication=; HttpOnly; Path=/; Max-Age=0',
+      'Refresh=; HttpOnly; Path=/; Max-Age=0'
+    ];
   }
 
   private async verifyPassword(plainTextPassword: string, hashedPassword: string) {

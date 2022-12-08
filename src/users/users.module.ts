@@ -9,7 +9,7 @@ import { FilesModule } from 'src/files/files.module';
 @Module({
   imports: [FilesModule, TypeOrmModule.forFeature([User, Address])],
   providers: [UsersService],
-  exports: [UsersService],
-  controllers: [UsersController]
+  controllers: [UsersController],
+  exports: [UsersService]
 })
 export class UsersModule { }

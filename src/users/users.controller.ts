@@ -7,8 +7,10 @@ import { Express } from 'express';
 import { CurrentUser } from './decorators/current-user';
 import User from './user.entity';
 import { JwtAuthGuard } from 'src/auth/guards';
+import { ClassSerializerInterceptor } from '@nestjs/common/serializer';
 
 @Controller('users')
+@UseInterceptors(ClassSerializerInterceptor)
 export class UsersController {
   constructor(
     private readonly usersService: UsersService,
