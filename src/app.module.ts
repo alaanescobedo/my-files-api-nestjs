@@ -5,7 +5,7 @@ import validationSchema from './config/validations.config';
 import { DatabaseModule } from './database/database.module';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
-import { AuthController } from './auth/auth.controller';
+import { CategoriesModule } from './categories/categories.module';
 
 @Module({
   imports: [
@@ -13,9 +13,10 @@ import { AuthController } from './auth/auth.controller';
     ConfigModule.forRoot({ validationSchema }),
     DatabaseModule,
     UsersModule,
-    AuthModule
+    AuthModule,
+    CategoriesModule
   ],
   controllers: [],
-  providers: [AuthController],
+  providers: [],
 })
 export class AppModule { }

@@ -1,4 +1,5 @@
-import { IsEmail, IsNotEmpty, IsString, MinLength } from "class-validator";
+import { IsEmail, IsNotEmpty, IsString, MinLength, IsOptional } from "class-validator";
+import Address from "src/users/address.entity";
 
 export class RegisterDto {
 
@@ -13,6 +14,9 @@ export class RegisterDto {
   @IsNotEmpty()
   @MinLength(7)
   password: string;
+
+  @IsOptional()
+  address: Address;
 }
 
 export default RegisterDto;
